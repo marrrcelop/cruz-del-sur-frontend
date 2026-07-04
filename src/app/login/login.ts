@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../core/auth';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -53,7 +54,7 @@ import { CommonModule } from '@angular/common';
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
-
+  private router = inject(Router);
   loginForm = this.fb.group({
     username: ['', Validators.required],
     password: ['', Validators.required]
@@ -64,12 +65,15 @@ export class LoginComponent {
   onSubmit() {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
-        next: (res) => {
-          if (res === 'Credenciales inválidas') {
-            this.errorMessage = 'Credenciales inválidas, intenta nuevamente.';
-          }
+        next: () => {
+          this.errorMessage = '';
+
+          // 👉 AQUÍ REDIRECCIÓN
+          this.router.navigate(['/home']); // o la ruta que tengas
         },
-        error: () => this.errorMessage = 'Error al conectar con el servidor.'
+        error: () => {
+          this.errorMessage = 'Error al conectar con el servidor.';
+        }
       });
     }
   }

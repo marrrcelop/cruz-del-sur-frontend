@@ -1,72 +1,76 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+// URL base de tu backend Spring Boot
+export const API_URL = 'http://localhost:8080';
+
+// Endpoints definidos
+export const ENDPOINTS = {
+  login: `${API_URL}/auth/login`,
+  registro: `${API_URL}/auth/register`,
+  clientes: `${API_URL}/clientes`,
+  reservas: `${API_URL}/reservas`,
+  usuarios: `${API_URL}/usuarios`,
+  viajes: `${API_URL}/viajes`
+};
+
+@Injectable({
+  providedIn: 'root'
+})
 export class ApiService {
-  
-  // --- BASE DE DATOS SIMULADA EN MEMORIA ---
-  private clientes = [
-    { id_cliente: 1, nombres: 'Juan', apellidos: 'Pérez', correo: 'juan@email.com', documento: '73456789' },
-    { id_cliente: 2, nombres: 'María', apellidos: 'Gómez', correo: 'maria@email.com', documento: '72345678' }
-  ];
 
-  private viajes = [
-    { id_viaje: 1, origen: 'Lima', destino: 'Arequipa', fecha: '2026-07-15', hora: '10:00', tipo_servicio: 'VIP', precio: 120.00 }
-  ];
+  constructor(private http: HttpClient) { }
 
-  private reservas = [
-    { id_reserva: 1, numero_asiento: 15, metodo_pago: 'Tarjeta', estado_pago: 'Confirmado', estado_reserva: 'Activa' }
-  ];
-
-  private usuarios = [
-    { id_usuario: 1, nombres: 'Admin', correo: 'admin@cruzdelsur.pe', rol: 'ADMIN' }
-  ];
-
-  // --- MÉTODOS MOCK PARA CLIENTES ---
-  getClientes(): Observable<any[]> { return of([...this.clientes]).pipe(delay(300)); }
-  createCliente(cliente: any): Observable<any> { 
-    cliente.id_cliente = Math.floor(Math.random() * 1000); // Genera ID aleatorio
-    this.clientes.push(cliente);
-    return of(cliente).pipe(delay(300)); 
-  }
-  deleteCliente(id: number): Observable<any> { 
-    this.clientes = this.clientes.filter(c => c.id_cliente !== id);
-    return of({ success: true }).pipe(delay(300)); 
+  // --- CLIENTES ---
+  getClientes(): Observable<any> {
+    return this.http.get(ENDPOINTS.clientes);
   }
 
-  // --- MÉTODOS MOCK PARA VIAJES ---
-  getViajes(): Observable<any[]> { return of([...this.viajes]).pipe(delay(300)); }
-  createViaje(viaje: any): Observable<any> { 
-    viaje.id_viaje = Math.floor(Math.random() * 1000);
-    this.viajes.push(viaje);
-    return of(viaje).pipe(delay(300)); 
-  }
-  deleteViaje(id: number): Observable<any> { 
-    this.viajes = this.viajes.filter(v => v.id_viaje !== id);
-    return of({ success: true }).pipe(delay(300)); 
+  createCliente(cliente: any): Observable<any> {
+    return this.http.post(ENDPOINTS.clientes, cliente);
   }
 
-  // --- MÉTODOS MOCK PARA RESERVAS ---
-  getReservas(): Observable<any[]> { return of([...this.reservas]).pipe(delay(300)); }
-  createReserva(reserva: any): Observable<any> { 
-    reserva.id_reserva = Math.floor(Math.random() * 1000);
-    this.reservas.push(reserva);
-    return of(reserva).pipe(delay(300)); 
-  }
-  deleteReserva(id: number): Observable<any> { 
-    this.reservas = this.reservas.filter(r => r.id_reserva !== id);
-    return of({ success: true }).pipe(delay(300)); 
+  deleteCliente(id: number | string): Observable<any> {
+    return this.http.delete(`${ENDPOINTS.clientes}/${id}`);
   }
 
-  // --- MÉTODOS MOCK PARA USUARIOS ---
-  getUsuarios(): Observable<any[]> { return of([...this.usuarios]).pipe(delay(300)); }
-  createUsuario(usuario: any): Observable<any> { 
-    usuario.id_usuario = Math.floor(Math.random() * 1000);
-    this.usuarios.push(usuario);
-    return of(usuario).pipe(delay(300)); 
+  // --- RESERVAS ---
+  getReservas(): Observable<any> {
+    return this.http.get(ENDPOINTS.reservas);
   }
-  deleteUsuario(id: number): Observable<any> { 
-    this.usuarios = this.usuarios.filter(u => u.id_usuario !== id);
-    return of({ success: true }).pipe(delay(300)); 
+
+  createReserva(reserva: any): Observable<any> {
+    return this.http.post(ENDPOINTS.reservas, reserva);
+  }
+
+  deleteReserva(id: number | string): Observable<any> {
+    return this.http.delete(`${ENDPOINTS.reservas}/${id}`);
+  }
+
+  // --- USUARIOS ---
+  getUsuarios(): Observable<any> {
+    return this.http.get(ENDPOINTS.usuarios);
+  }
+
+  createUsuario(usuario: any): Observable<any> {
+    return this.http.post(ENDPOINTS.usuarios, usuario);
+  }
+
+  deleteUsuario(id: number | string): Observable<any> {
+    return this.http.delete(`${ENDPOINTS.usuarios}/${id}`);
+  }
+
+  // --- VIAJES ---
+  getViajes(): Observable<any> {
+    return this.http.get(ENDPOINTS.viajes);
+  }
+
+  createViaje(viaje: any): Observable<any> {
+    return this.http.post(ENDPOINTS.viajes, viaje);
+  }
+
+  deleteViaje(id: number | string): Observable<any> {
+    return this.http.delete(`${ENDPOINTS.viajes}/${id}`);
   }
 }

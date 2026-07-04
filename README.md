@@ -2,58 +2,30 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.14.
 
-## Development server
+## Boton cerrar sesion
 
-To start a local development server, run:
+Falta agragar funcionalidad al boton cerrar sesion
 
-```bash
-ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
-## Code scaffolding
+## Boton cerrar sesion
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Falta agregar boton "cerrar sesion" en pestaña de adiministrador
 
-```bash
-ng generate component component-name
-```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Funcion por roles
 
-```bash
-ng generate --help
-```
+Cualquiera puede entrar a la pestaña "usuarios" sin importar solo, esa pestaña debe ser explusiva para rol "ADMIN"
 
-## Building
 
-To build the project run:
 
-```bash
-ng build
-```
+## Boleta de pago
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+En la pestaña "reservas", se debe implementar un boton que genere una boleta
 
-## Running unit tests
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
 
-```bash
-ng test
-```
 
-## Running end-to-end tests
+## Mejorar diseño del frontend
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Se debe modificar el frondend para hacerlo mas intuitivo y estetico para el que use la pagina

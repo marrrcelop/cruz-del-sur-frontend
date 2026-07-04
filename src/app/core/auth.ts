@@ -1,36 +1,34 @@
-import { Injectable, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { of, delay } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { ENDPOINTS } from './api';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private router = inject(Router);
 
-  login(credentials: any) {
-    // Simulamos una petición al servidor con un pequeño retraso
-    const fakeResponse = (credentials.username === 'admin' && credentials.password === '1234')
-      ? 'fake-jwt-token-123456789'
-      : 'Credenciales inválidas';
+  constructor(private http: HttpClient) { }
 
-    // Usamos 'of' de RxJS para devolver un Observable simulado
-    return of(fakeResponse).pipe(
-      delay(500), // Simula medio segundo de carga
+  login(credentials: any): Observable<string> {
+    return this.http.post(ENDPOINTS.login, credentials, {
+      responseType: 'text'
+    }).pipe(
       tap(token => {
-        if (token && token !== 'Credenciales inválidas') {
-          localStorage.setItem('token', token);
-          this.router.navigate(['/home']);
-        }
+        localStorage.setItem('token', token);
       })
     );
   }
 
-  logout() {
+  logout(): void {
     localStorage.removeItem('token');
-    this.router.navigate(['/login']);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('token');
+    return this.getToken() !== null;
   }
 }
