@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService } from '../core/api';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-usuarios',
@@ -9,7 +10,10 @@ import { CommonModule } from '@angular/common';
   imports: [ReactiveFormsModule, CommonModule],
   template: `
     <div class="container">
-      <h3>Gestión de Usuarios Administrativos</h3>
+      <div class="header">
+        <h3>Gestión de Usuarios Administrativos</h3>
+        <button type="button" (click)="volverAlMenu()" class="btn-secondary">Volver al menu</button>
+      </div>
       
       <form [formGroup]="usuarioForm" (ngSubmit)="onSubmit()" class="form-card">
         <div class="grid-2">
@@ -64,6 +68,7 @@ import { CommonModule } from '@angular/common';
   `,
   styles: [`
     .container { padding: 0 2rem; max-width: 1200px; margin: auto; font-family: Arial, sans-serif; }
+    .header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 1rem; }
     h3 { color: #333; }
     .form-card { background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 2rem; }
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -72,16 +77,23 @@ import { CommonModule } from '@angular/common';
     .form-control { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
     .btn-success { padding: 0.6rem 1.2rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0.5rem; }
     .btn-success:disabled { background-color: #a5d8b1; cursor: not-allowed; }
+    .btn-secondary { padding: 0.55rem 1rem; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.95rem; white-space: nowrap; }
+    .btn-secondary:hover { background-color: #5c636a; }
     .btn-danger-small { padding: 0.4rem 0.8rem; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;}
     .table-responsive { overflow-x: auto; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
     th { background-color: #f8f9fa; }
+    @media (max-width: 640px) {
+      .header { align-items: stretch; flex-direction: column; }
+      .btn-secondary { width: 100%; }
+    }
   `]
 })
 export class UsuariosComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
+  private router = inject(Router);
   
   usuarios: any[] = [];
   
@@ -111,5 +123,9 @@ export class UsuariosComponent implements OnInit {
     if (confirm('¿Eliminar usuario?')) {
       this.apiService.deleteUsuario(id).subscribe(() => this.cargarUsuarios());
     }
+  }
+
+  volverAlMenu() {
+    this.router.navigate(['/home']);
   }
 }
