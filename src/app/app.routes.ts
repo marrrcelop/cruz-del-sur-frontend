@@ -13,6 +13,6 @@ export const routes: Routes = [
   { path: 'clientes', component: ClientesComponent, canActivate: [authGuard] },
   { path: 'viajes', component: ViajesComponent, canActivate: [authGuard] },
   { path: 'reservas', component: ReservasComponent, canActivate: [authGuard] },
-  { path: 'usuarios', component: UsuariosComponent, canActivate: [authGuard] },
+  { path: 'usuarios', component: UsuariosComponent, canActivate: [authGuard], data: { roles: ['ADMIN'] } },
   { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
