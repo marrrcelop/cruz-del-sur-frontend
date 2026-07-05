@@ -71,8 +71,10 @@ export class LoginComponent {
           // 👉 AQUÍ REDIRECCIÓN
           this.router.navigate(['/home']); // o la ruta que tengas
         },
-        error: () => {
-          this.errorMessage = 'Error al conectar con el servidor.';
+        error: (error) => {
+          this.errorMessage = error?.message === 'Credenciales invalidas'
+            ? 'Credenciales invalidas.'
+            : 'Error al conectar con el servidor.';
         }
       });
     }

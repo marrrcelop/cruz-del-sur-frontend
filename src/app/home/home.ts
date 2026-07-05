@@ -35,7 +35,7 @@ import { CommonModule } from '@angular/common';
           <p>Boletos y pagos</p>
         </div>
         
-        <div class="card" (click)="go('/usuarios')">
+        <div class="card" *ngIf="isAdmin()" (click)="go('/usuarios')">
           <div class="icon">⚙️</div>
           <h4>Usuarios</h4>
           <p>Administradores</p>
@@ -68,5 +68,10 @@ export class HomeComponent {
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  isAdmin(): boolean {
+    return this.authService.isAdmin();
   }
 }
