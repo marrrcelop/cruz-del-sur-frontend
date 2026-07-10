@@ -11,28 +11,32 @@ import { CommonModule } from '@angular/common';
   template: `
     <nav class="navbar">
       <h2>Panel Cruz del Sur</h2>
-      <button (click)="volver()" class="btn-success">Volver al Menú</button>
+      <button (click)="volver()" class="btn-success">Volver al Menu</button>
     </nav>
     <div class="container">
-      <h3>Gestión de Clientes</h3>
-      
+      <h3>Gestion de Clientes</h3>
+
       <form [formGroup]="clienteForm" (ngSubmit)="onSubmit()" class="form-card">
         <div class="grid-2">
           <div class="form-group">
             <label>Nombres</label>
-            <input formControlName="nombres" class="form-control" placeholder="Ej. Juan">
+            <input formControlName="nombres" class="form-control" [class.invalid]="isInvalid('nombres')" placeholder="Ej. Juan">
+            <div *ngIf="isInvalid('nombres')" class="error">{{ getError('nombres') }}</div>
           </div>
           <div class="form-group">
             <label>Apellidos</label>
-            <input formControlName="apellidos" class="form-control" placeholder="Ej. Pérez">
+            <input formControlName="apellidos" class="form-control" [class.invalid]="isInvalid('apellidos')" placeholder="Ej. Perez">
+            <div *ngIf="isInvalid('apellidos')" class="error">{{ getError('apellidos') }}</div>
           </div>
           <div class="form-group">
             <label>Correo</label>
-            <input formControlName="correo" type="email" class="form-control" placeholder="juan@email.com">
+            <input formControlName="correo" type="email" class="form-control" [class.invalid]="isInvalid('correo')" placeholder="juan@email.com">
+            <div *ngIf="isInvalid('correo')" class="error">{{ getError('correo') }}</div>
           </div>
           <div class="form-group">
             <label>Documento</label>
-            <input formControlName="documento" class="form-control" placeholder="DNI o Carnet">
+            <input formControlName="documento" class="form-control" [class.invalid]="isInvalid('documento')" placeholder="DNI o Carnet">
+            <div *ngIf="isInvalid('documento')" class="error">{{ getError('documento') }}</div>
           </div>
         </div>
         <button type="submit" [disabled]="clienteForm.invalid" class="btn-primary">Guardar Cliente</button>
@@ -77,6 +81,8 @@ import { CommonModule } from '@angular/common';
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
     .form-control { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .form-control.invalid { border-color: #dc3545; background: #fff8f8; }
+    .error { color: #dc3545; font-size: 0.85rem; margin-top: 0.35rem; }
     .btn-primary { padding: 0.6rem 1.2rem; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; margin-top: 0.5rem; }
     .btn-primary:disabled { background-color: #a0c4e8; cursor: not-allowed; }
     .btn-success { padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -93,12 +99,12 @@ export class ClientesComponent implements OnInit {
   private router = inject(Router);
 
   clientes: any[] = [];
-  
+
   clienteForm = this.fb.group({
-    nombres: ['', Validators.required],
-    apellidos: ['', Validators.required],
+    nombres: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[A-Za-zÀ-ÿ\s]+$/)]],
+    apellidos: ['', [Validators.required, Validators.minLength(2), Validators.pattern(/^[A-Za-zÀ-ÿ\s]+$/)]],
     correo: ['', [Validators.required, Validators.email]],
-    documento: ['', Validators.required]
+    documento: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9A-Za-z]+$/)]]
   });
 
   ngOnInit() { this.cargarClientes(); }
@@ -108,21 +114,43 @@ export class ClientesComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.clienteForm.valid) {
-      this.apiService.createCliente(this.clienteForm.value).subscribe(() => {
-        this.cargarClientes();
-        this.clienteForm.reset();
-      });
+    if (this.clienteForm.invalid) {
+      this.clienteForm.markAllAsTouched();
+      return;
     }
+
+    this.apiService.createCliente(this.clienteForm.value).subscribe(() => {
+      this.cargarClientes();
+      this.clienteForm.reset();
+    });
   }
 
   eliminar(id: number) {
-    if (confirm('¿Estás seguro de eliminar este cliente?')) {
+    if (confirm('Estas seguro de eliminar este cliente?')) {
       this.apiService.deleteCliente(id).subscribe(() => this.cargarClientes());
     }
   }
 
   volver() {
     this.router.navigate(['/home']);
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.clienteForm.get(controlName);
+    return !!control && control.invalid && (control.dirty || control.touched);
+  }
+
+  getError(controlName: string): string {
+    const errors = this.clienteForm.get(controlName)?.errors;
+
+    if (!errors) return '';
+    if (errors['required']) return 'Este campo es obligatorio.';
+    if (errors['email']) return 'Ingresa un correo valido.';
+    if (errors['minlength']) return `Debe tener al menos ${errors['minlength'].requiredLength} caracteres.`;
+    if (errors['maxlength']) return `Debe tener maximo ${errors['maxlength'].requiredLength} caracteres.`;
+    if (errors['pattern'] && controlName === 'documento') return 'Solo se permiten letras y numeros.';
+    if (errors['pattern']) return 'Solo se permiten letras y espacios.';
+
+    return 'Dato invalido.';
   }
 }

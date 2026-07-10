@@ -11,31 +11,35 @@ import { CommonModule } from '@angular/common';
   template: `
     <nav class="navbar">
       <h2>Panel Cruz del Sur</h2>
-      <button (click)="volver()" class="btn-success">Volver al Menú</button>
+      <button (click)="volver()" class="btn-success">Volver al Menu</button>
     </nav>
     <div class="container">
-      <h3>Gestión de Reservas</h3>
-      
+      <h3>Gestion de Reservas</h3>
+
       <form [formGroup]="reservaForm" (ngSubmit)="onSubmit()" class="form-card">
         <div class="grid-2">
           <div class="form-group">
             <label>ID Cliente</label>
-            <input type="number" formControlName="clienteId" class="form-control">
+            <input type="number" formControlName="clienteId" class="form-control" [class.invalid]="isInvalid('clienteId')">
+            <div *ngIf="isInvalid('clienteId')" class="error">{{ getError('clienteId') }}</div>
           </div>
           <div class="form-group">
             <label>ID Viaje</label>
-            <input type="number" formControlName="viajeId" class="form-control">
+            <input type="number" formControlName="viajeId" class="form-control" [class.invalid]="isInvalid('viajeId')">
+            <div *ngIf="isInvalid('viajeId')" class="error">{{ getError('viajeId') }}</div>
           </div>
           <div class="form-group">
-            <label>Número de Asiento</label>
-            <input type="number" formControlName="numero_asiento" class="form-control">
+            <label>Numero de Asiento</label>
+            <input type="number" formControlName="numero_asiento" class="form-control" [class.invalid]="isInvalid('numero_asiento')">
+            <div *ngIf="isInvalid('numero_asiento')" class="error">{{ getError('numero_asiento') }}</div>
           </div>
           <div class="form-group">
-            <label>Método de Pago</label>
-            <select formControlName="metodo_pago" class="form-control">
+            <label>Metodo de Pago</label>
+            <select formControlName="metodo_pago" class="form-control" [class.invalid]="isInvalid('metodo_pago')">
               <option value="Tarjeta">Tarjeta</option>
               <option value="Efectivo">Efectivo</option>
             </select>
+            <div *ngIf="isInvalid('metodo_pago')" class="error">{{ getError('metodo_pago') }}</div>
           </div>
         </div>
         <button type="submit" [disabled]="reservaForm.invalid" class="btn-primary">Registrar Reserva</button>
@@ -47,7 +51,7 @@ import { CommonModule } from '@angular/common';
             <tr>
               <th>ID Reserva</th>
               <th>Asiento</th>
-              <th>Método de Pago</th>
+              <th>Metodo de Pago</th>
               <th>Estado Pago</th>
               <th>Acciones</th>
             </tr>
@@ -78,6 +82,8 @@ import { CommonModule } from '@angular/common';
     .form-group { margin-bottom: 1rem; }
     .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; }
     .form-control { width: 100%; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    .form-control.invalid { border-color: #dc3545; background: #fff8f8; }
+    .error { color: #dc3545; font-size: 0.85rem; margin-top: 0.35rem; }
     .btn-primary { padding: 0.6rem 1.2rem; background-color: #0056b3; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0.5rem; }
     .btn-primary:disabled { background-color: #a0c4e8; cursor: not-allowed; }
     .btn-success { padding: 0.5rem 1rem; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; }
@@ -92,13 +98,13 @@ export class ReservasComponent implements OnInit {
   private fb = inject(FormBuilder);
   private apiService = inject(ApiService);
   private router = inject(Router);
-  
+
   reservas: any[] = [];
-  
+
   reservaForm = this.fb.group({
-    clienteId: ['', Validators.required],
-    viajeId: ['', Validators.required],
-    numero_asiento: ['', Validators.required],
+    clienteId: ['', [Validators.required, Validators.min(1)]],
+    viajeId: ['', [Validators.required, Validators.min(1)]],
+    numero_asiento: ['', [Validators.required, Validators.min(1), Validators.max(60)]],
     metodo_pago: ['Tarjeta', Validators.required]
   });
 
@@ -109,30 +115,49 @@ export class ReservasComponent implements OnInit {
   }
 
   onSubmit() {
-    if (this.reservaForm.valid) {
-      const payload = {
-        cliente: { id_cliente: this.reservaForm.value.clienteId },
-        viaje: { id_viaje: this.reservaForm.value.viajeId },
-        numero_asiento: this.reservaForm.value.numero_asiento,
-        metodo_pago: this.reservaForm.value.metodo_pago,
-        estado_pago: 'Confirmado',
-        estado_reserva: 'Activa'
-      };
-
-      this.apiService.createReserva(payload).subscribe(() => {
-        this.cargarReservas();
-        this.reservaForm.reset({metodo_pago: 'Tarjeta'});
-      });
+    if (this.reservaForm.invalid) {
+      this.reservaForm.markAllAsTouched();
+      return;
     }
+
+    const payload = {
+      cliente: { id_cliente: this.reservaForm.value.clienteId },
+      viaje: { id_viaje: this.reservaForm.value.viajeId },
+      numero_asiento: this.reservaForm.value.numero_asiento,
+      metodo_pago: this.reservaForm.value.metodo_pago,
+      estado_pago: 'Confirmado',
+      estado_reserva: 'Activa'
+    };
+
+    this.apiService.createReserva(payload).subscribe(() => {
+      this.cargarReservas();
+      this.reservaForm.reset({ metodo_pago: 'Tarjeta' });
+    });
   }
 
   eliminar(id: number) {
-    if (confirm('¿Eliminar reserva?')) {
+    if (confirm('Eliminar reserva?')) {
       this.apiService.deleteReserva(id).subscribe(() => this.cargarReservas());
     }
   }
 
   volver() {
     this.router.navigate(['/home']);
+  }
+
+  isInvalid(controlName: string): boolean {
+    const control = this.reservaForm.get(controlName);
+    return !!control && control.invalid && (control.dirty || control.touched);
+  }
+
+  getError(controlName: string): string {
+    const errors = this.reservaForm.get(controlName)?.errors;
+
+    if (!errors) return '';
+    if (errors['required']) return 'Este campo es obligatorio.';
+    if (errors['min']) return `Debe ser mayor o igual a ${errors['min'].min}.`;
+    if (errors['max']) return `Debe ser menor o igual a ${errors['max'].max}.`;
+
+    return 'Dato invalido.';
   }
 }
